@@ -1,6 +1,6 @@
 const path = require('path')
 const express = require('express')
-const hbs = require('handlebars')
+const hbs = require('hbs')
 
 const app = express()
 
@@ -12,14 +12,14 @@ const partialsPath = path.join(__dirname, '../templates/partials')
 // Setup handlebars engine and views location
 app.set('view engine', 'hbs')
 app.set('views', viewsPath)
-hbs.registerPartial(partialsPath)
+hbs.registerPartials(partialsPath) 
 
 //Setup static directory to serve
 app.use(express.static(publicDirPath))
 
 app.get('', (req, res) => {
     res.render('index', {
-        title: 'HandleBars App',
+        title: 'Weather',
         name: 'Satyam'
     })
 })
@@ -34,6 +34,7 @@ app.get('/about', (req, res) => {
 app.get('/help', (req, res) => {
     res.render('help', {
         title: 'Help Page',
+        name: 'Satyam'
     })
 })
 
@@ -41,6 +42,22 @@ app.get('/weather', (req, res) => {
     res.send({
         forecast: 'Clear',
         location: 'Faridabad'
+    })
+})
+
+app.get('/help/*', (req, res) => {
+    res.render('Error', {
+        title: '404',
+        name: 'Satyam',
+        message: 'Help article not found.'
+    })
+})
+
+app.get('*', (req, res) => {
+    res.render('Error', {
+        title: '404',
+        name: 'Satyam',
+        message: 'Page not Found.',
     })
 })
 
