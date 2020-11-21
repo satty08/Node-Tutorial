@@ -30,14 +30,28 @@ app.listen(port, () => {
 
 const jwt = require('jsonwebtoken')
 
-// encryption
-const myFunction = async () => {
-    const token = jwt.sign({ _id: 'abx123' }, 'thisismynewcourse')
-    console.log(token);
 
-    const data = jwt.verify(token, 'thisismynewcourse')
-    console.log(data);
+// encryption
+// const myFunction = async () => {
+//     const token = jwt.sign({ _id: 'abx123' }, 'thisismynewcourse')
+//     console.log(token);
+
+//     const data = jwt.verify(token, 'thisismynewcourse')
+//     console.log(data);
+// }
+
+// myFunction()
+
+const Task = require('./models/task')
+const User = require('./models/user')
+const main= async () => {
+    // const task = await Task.findById('')
+    // await task.populate('owner').execPopulate()
+    // console.log(task.owner);
+
+    const user = await User.findById('5fb8a8849b85a51a58b9d124')
+    await user.populate('tasks').execPopulate()
+    console.log(user.tasks);
 }
 
-myFunction()
-
+main()
