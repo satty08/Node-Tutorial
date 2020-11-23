@@ -10,20 +10,12 @@ router.post('/tasks', auth, async (req, res) => {
         owner: req.user._id
     })
 
-    try{
+    try {
         await task.save()
         res.status(201).send(task)
     } catch (e) {
         res.status(400).send(e)
     }
-
-    // task.save().then(() => {
-    //     res.status(201).send(task)
-    // }).catch((e) => {
-    //     res.status(400).send(e)
-    // })
-
-
 })
 
 router.get('/tasks', async (req, res) => {
