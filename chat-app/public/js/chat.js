@@ -14,9 +14,28 @@ const $messageForm = document.querySelector('#sendmsg')
 const $messageInput = $messageForm.querySelector('input')
 const $messageButton = $messageForm.querySelector('button')
 const $sendLocation = document.querySelector('#sendLocation')
+const $messages = document.querySelector('#messages')
+
+//Templates
+const messagesTemplate = document.querySelector('#messageTemplate').innerHTML
+const locationTemplate = document.querySelector('#locationTemplate').innerHTML
 
 socket.on('connectToIo', (message) => {
     console.log(message);
+    const html = Mustache.render(messagesTemplate, {
+        message: message.text,
+        createdAt: moment(message.createdAt).format('hh:mm:ss a')
+    })
+    $messages.insertAdjacentHTML('beforeend', html)
+})
+
+socket.on('locationMessage', (url) => {
+    console.log(url);
+    const location = Mustache.render(locationTemplate, {
+        url: url.url,
+        createdAt: moment(url.createdAt).format('hh:mm:ss a')
+    })
+    $messages.insertAdjacentHTML('beforeend', location)
 })
 
 $messageForm.addEventListener('submit', (e) => {
