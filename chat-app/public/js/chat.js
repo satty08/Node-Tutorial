@@ -20,11 +20,14 @@ const $messages = document.querySelector('#messages')
 const messagesTemplate = document.querySelector('#messageTemplate').innerHTML
 const locationTemplate = document.querySelector('#locationTemplate').innerHTML
 
+//Options
+const {username, room} = Qs.parse(location.search, { ignoreQueryPrefix: true })
+
 socket.on('connectToIo', (message) => {
     console.log(message);
     const html = Mustache.render(messagesTemplate, {
         message: message.text,
-        createdAt: moment(message.createdAt).format('hh:mm:ss a')
+        createdAt: moment(message.createdAt).format('hh:mm a')
     })
     $messages.insertAdjacentHTML('beforeend', html)
 })
@@ -33,7 +36,7 @@ socket.on('locationMessage', (url) => {
     console.log(url);
     const location = Mustache.render(locationTemplate, {
         url: url.url,
-        createdAt: moment(url.createdAt).format('hh:mm:ss a')
+        createdAt: moment(url.createdAt).format('hh:mm a')
     })
     $messages.insertAdjacentHTML('beforeend', location)
 })
@@ -75,3 +78,5 @@ $sendLocation.addEventListener('click', () => {
         })
     })
 })
+
+socket.emit('join', { username, room })

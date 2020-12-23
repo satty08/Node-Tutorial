@@ -26,8 +26,13 @@ io.on('connection', (socket) => {
     //     // socket.emit('countUpdated', count)
     //     io.emit('countUpdated', count)
     // })
-    socket.emit('connectToIo', generateMessage(message))
-    socket.broadcast.emit('connectToIo', generateMessage('A new user has joined'))
+    
+    socket.on('join', ({ username, room }) => {
+        socket.join(room)
+        socket.emit('connectToIo', generateMessage(message))
+        socket.broadcast.to(room).emit('connectToIo', generateMessage(`${username} has joined the chat room`))
+
+    })
 
     socket.on('sendMessage', (message, callback) => {
         const filter = new Filter()
@@ -36,7 +41,7 @@ io.on('connection', (socket) => {
             return callback('Profanity not allowed')
         }
 
-        io.emit('connectToIo', generateMessage(message))
+        io.to().emit('connectToIo', generateMessage(message))
         callback()
     })
 
@@ -44,13 +49,13 @@ io.on('connection', (socket) => {
 
         const location = `https://www.google.com/maps?q=${lat},${long}`
 
-        io.emit('locationMessage', generateLocationMessage(location))
+        io.to().emit('locationMessage', generateLocationMessage(location))
 
         callback()
     })
 
     socket.on('disconnect', () => {
-        io.emit('connectToIo', generateMessage('A user has left'))
+        io.to().emit('connectToIo', generateMessage(`A user has left`))
     })
 })
 
