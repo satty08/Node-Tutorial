@@ -26,6 +26,7 @@ const {username, room} = Qs.parse(location.search, { ignoreQueryPrefix: true })
 socket.on('connectToIo', (message) => {
     console.log(message);
     const html = Mustache.render(messagesTemplate, {
+        username: message.username,
         message: message.text,
         createdAt: moment(message.createdAt).format('hh:mm a')
     })
@@ -35,6 +36,7 @@ socket.on('connectToIo', (message) => {
 socket.on('locationMessage', (url) => {
     console.log(url);
     const location = Mustache.render(locationTemplate, {
+        username: url.username,
         url: url.url,
         createdAt: moment(url.createdAt).format('hh:mm a')
     })
@@ -79,4 +81,9 @@ $sendLocation.addEventListener('click', () => {
     })
 })
 
-socket.emit('join', { username, room })
+socket.emit('join', { username, room }, (error) => {
+    if (error) {
+        alert(error)
+        location.href = '/'
+    }
+})

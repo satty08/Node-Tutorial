@@ -4,6 +4,7 @@ const express = require('express')
 const socketio = require('socket.io')
 const Filter = require('bad-words')
 const { generateMessage, generateLocationMessage } = require('./utils/messages')
+const { addUser, removeUser, getUser, getUsersInRoom } = require('./utils/users')
 
 const app = express()
 const server = http.createServer(app)
@@ -27,35 +28,51 @@ io.on('connection', (socket) => {
     //     io.emit('countUpdated', count)
     // })
     
-    socket.on('join', ({ username, room }) => {
-        socket.join(room)
-        socket.emit('connectToIo', generateMessage(message))
-        socket.broadcast.to(room).emit('connectToIo', generateMessage(`${username} has joined the chat room`))
+    socket.on('join', ({ username, room }, callback) => {
 
+        const {error, user} = addUser({ id: socket.id, username, room })
+
+        if (error) {
+            return callback(error)
+        }
+
+        socket.join(user.room)
+
+        socket.emit('connectToIo', generateMessage('Admin', message))
+        socket.broadcast.to(user.room).emit('connectToIo', generateMessage('Admin', `${user.username} has joined the chat room`))
+
+        callback()
     })
 
     socket.on('sendMessage', (message, callback) => {
+        const user = getUser(socket.id)
         const filter = new Filter()
 
         if (filter.isProfane(message)) {
             return callback('Profanity not allowed')
         }
 
-        io.to().emit('connectToIo', generateMessage(message))
+        io.to(user.room).emit('connectToIo', generateMessage(user.username, message))
         callback()
     })
 
     socket.on('location', ({lat, long}, callback) => {
+        const user = getUser(socket.id)
 
         const location = `https://www.google.com/maps?q=${lat},${long}`
 
-        io.to().emit('locationMessage', generateLocationMessage(location))
+        io.to(user.room).emit('locationMessage', generateLocationMessage(user.username,location))
 
         callback()
     })
 
     socket.on('disconnect', () => {
-        io.to().emit('connectToIo', generateMessage(`A user has left`))
+
+        const user = removeUser(socket.id)
+
+        if (user) {
+            io.to(user.room).emit('connectToIo', generateMessage('Admin',`${user.username} has left`))   
+        }
     })
 })
 
