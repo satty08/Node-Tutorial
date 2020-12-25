@@ -40,6 +40,12 @@ io.on('connection', (socket) => {
 
         socket.emit('connectToIo', generateMessage('Admin', message))
         socket.broadcast.to(user.room).emit('connectToIo', generateMessage('Admin', `${user.username} has joined the chat room`))
+        io.to(user.room).emit('roomdata', {
+            room: user.room,
+            users: getUsersInRoom(user.room)
+        })
+        const res = getUsersInRoom(user.room)
+        console.log(res);
 
         callback()
     })
@@ -72,6 +78,10 @@ io.on('connection', (socket) => {
 
         if (user) {
             io.to(user.room).emit('connectToIo', generateMessage('Admin',`${user.username} has left`))   
+            io.to(user.room).emit('roomdata', {
+                room: user.room,
+                users: getUsersInRoom(user.room)
+            })
         }
     })
 })

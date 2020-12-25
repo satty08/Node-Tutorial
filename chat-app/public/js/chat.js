@@ -19,9 +19,33 @@ const $messages = document.querySelector('#messages')
 //Templates
 const messagesTemplate = document.querySelector('#messageTemplate').innerHTML
 const locationTemplate = document.querySelector('#locationTemplate').innerHTML
+const sidebarTemplate = document.querySelector('#sidebarTemplate').innerHTML
 
 //Options
 const {username, room} = Qs.parse(location.search, { ignoreQueryPrefix: true })
+
+const autoscroll = () => {
+    // New Message Element
+    const $newMessage = $messages.lastElementChild
+
+    //Height of new message
+    const newMessageStyles = getComputedStyle($newMessage)
+    const newMessageMargin = parseInt(newMessageStyles.marginBottom)
+    const newMessageHeight = $newMessage.offsetHeight + newMessageMargin
+
+    // Visible Height
+    const visibleHeight = $messages.offsetHeight
+
+    //Height of message containers
+    const containerHeight = $messages.scrollHeight
+
+    // How far have i scrolled
+    const scrollOffset = $messages.scrollTop + visibleHeight
+
+    if (containerHeight - newMessageHeight <= scrollOffset) {
+        $messages.scrollTop = $messages.scrollHeight
+    }
+}
 
 socket.on('connectToIo', (message) => {
     console.log(message);
@@ -31,6 +55,7 @@ socket.on('connectToIo', (message) => {
         createdAt: moment(message.createdAt).format('hh:mm a')
     })
     $messages.insertAdjacentHTML('beforeend', html)
+    autoscroll()
 })
 
 socket.on('locationMessage', (url) => {
@@ -41,6 +66,15 @@ socket.on('locationMessage', (url) => {
         createdAt: moment(url.createdAt).format('hh:mm a')
     })
     $messages.insertAdjacentHTML('beforeend', location)
+    autoscroll()
+})
+
+socket.on('roomdata', ({ room, users }) => {
+    const html = Mustache.render(sidebarTemplate, {
+        room,
+        users
+    })
+    document.querySelector('#sidebar').innerHTML = html
 })
 
 $messageForm.addEventListener('submit', (e) => {

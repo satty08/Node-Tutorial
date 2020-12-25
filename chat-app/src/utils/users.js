@@ -54,7 +54,7 @@ const getUsersInRoom = (room) => {
     room = room.trim().toLowerCase()
     users.forEach((user) => {
         if (user.room === room) {
-            userInRoom.push(user.username)
+            userInRoom.push(user)
         }
     })
 
